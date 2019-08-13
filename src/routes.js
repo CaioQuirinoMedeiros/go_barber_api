@@ -1,9 +1,9 @@
-import { Router } from "express";
+import { Router } from 'express';
 
 const routes = new Router();
 
-routes.get("/", (req, res) => {
-  res.send("olá");
+routes.get('/', (req, res) => {
+  res.send('olá');
 });
 
 export default routes;
