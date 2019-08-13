@@ -28,6 +28,10 @@ class User extends Model {
     return this;
   }
 
+  static async findByEmail(email) {
+    return this.findOne({ where: { email } });
+  }
+
   checkPassword(password) {
     return bcrypt.compare(password, this.password_hash);
   }
@@ -43,6 +47,7 @@ class User extends Model {
     const values = { ...this.get() };
 
     delete values.password_hash;
+    delete values.password;
 
     return values;
   }
