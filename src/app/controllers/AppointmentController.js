@@ -137,7 +137,6 @@ class AppointmentController {
 
       return res.status(200).send(appointment);
     } catch (err) {
-      console.log(err);
       return res.status(400).send({ error: 'Unable to cancel appointment' });
     }
   }
