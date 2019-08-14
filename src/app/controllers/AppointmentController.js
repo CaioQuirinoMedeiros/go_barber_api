@@ -23,6 +23,14 @@ class AppointmentController {
     const { provider_id, date } = req.body;
 
     try {
+      // Check if provider_id is the user himself
+      if (req.userId === provider_id) {
+        return res
+          .status(400)
+          .send({ error: "you can't schedule an appointment with yourself" });
+      }
+
+      // Check if provider_id is a provider
       const provider = await User.findProvider(provider_id);
 
       if (!provider) {
@@ -35,10 +43,12 @@ class AppointmentController {
 
       const hourStart = startOfHour(parsedDate);
 
+      // Check if it's a past date
       if (isBefore(hourStart, new Date())) {
         return res.status(400).send({ error: "You can't go back in the past" });
       }
 
+      // Check if already existis an appointment in this date
       const scheduledAppointment = await Appointment.findByProviderAndDate(
         provider_id,
         hourStart
