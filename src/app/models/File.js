@@ -1,7 +1,5 @@
 import Sequelize, { Model } from 'sequelize';
 
-console.log('OPA: ', process.env);
-
 class File extends Model {
   static init(sequelize) {
     super.init(
