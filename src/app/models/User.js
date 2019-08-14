@@ -36,6 +36,10 @@ class User extends Model {
     return this.findOne({ where: { email } });
   }
 
+  static async findProvider(id) {
+    return this.findOne({ where: { id, provider: true } });
+  }
+
   checkPassword(password) {
     return bcrypt.compare(password, this.password_hash);
   }

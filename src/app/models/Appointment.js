@@ -19,6 +19,14 @@ class Appointment extends Model {
     this.belongsTo(models.User, { foreignKey: 'user_id', as: 'user' });
     this.belongsTo(models.User, { foreignKey: 'provider_id', as: 'provider' });
   }
+
+  static async findByProviderAndDate(provider_id, date) {
+    const app = await this.findOne({
+      where: { provider_id, date, canceled_at: null },
+    });
+
+    return app;
+  }
 }
 
 export default Appointment;
