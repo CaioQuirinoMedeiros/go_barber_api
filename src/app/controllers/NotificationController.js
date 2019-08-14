@@ -21,6 +21,26 @@ class NotificationController {
       return res.status(400).send({ error: 'Unable to get notifications' });
     }
   }
+
+  async update(req, res) {
+    const { id } = req.params;
+
+    try {
+      const notification = await Notification.findByIdAndUpdate(
+        id,
+        { read: true },
+        { new: true }
+      );
+
+      if (!notification) {
+        return res.status(404).send({ error: 'Notification not found' });
+      }
+
+      return res.status(200).send(notification);
+    } catch (err) {
+      return res.status(400).send({ error: 'Unable to update notification' });
+    }
+  }
 }
 
 export default new NotificationController();
