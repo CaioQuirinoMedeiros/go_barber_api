@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { startOfHour, parse, isBefore, format } from 'date-fns';
+import { startOfHour, parse, isBefore, format, subHours } from 'date-fns';
 import pt from 'date-fns/locale/pt';
 
 import Appointment from '../models/Appointment';
@@ -105,6 +105,41 @@ class AppointmentController {
     });
 
     return res.status(200).send(appointments);
+  }
+
+  async delete(req, res) {
+    const { id } = req.params;
+
+    try {
+      const appointment = await Appointment.findByPk(id);
+
+      if (!appointment) {
+        return res.status(404).send({ error: 'Appointment not found' });
+      }
+
+      if (appointment.user_id !== req.userId) {
+        return res.status(401).send({
+          error: "You don't have permission to cancel this appointment",
+        });
+      }
+
+      const dateWithSub = subHours(appointment.date, 2);
+
+      if (isBefore(dateWithSub, new Date())) {
+        return res
+          .status(400)
+          .send({ error: 'Too late to cancel the appointment' });
+      }
+
+      appointment.canceled_at = format(new Date());
+
+      await appointment.save();
+
+      return res.status(200).send(appointment);
+    } catch (err) {
+      console.log(err);
+      return res.status(400).send({ error: 'Unable to cancel appointment' });
+    }
   }
 }
 
