@@ -6,6 +6,7 @@ import Appointment from '../models/Appointment';
 import User from '../models/User';
 import File from '../models/File';
 import Notification from '../schemas/Notification';
+import Mail from '../../services/Mail';
 
 class AppointmentController {
   async store(req, res) {
@@ -75,6 +76,16 @@ class AppointmentController {
       await Notification.create({
         content: `Novo agendamento de ${user.name} para o dia ${formatedDate}`,
         user: provider_id,
+      });
+
+      await Mail.sendMail({
+        subject: 'Novo agendamento',
+        text: `Novo agendamento de ${user.name} para o dia ${formatedDate}`,
+        to: provider.email,
+        template_id: 'd-98b4482d2f4145cfaeb2f259aea20c7e',
+        dynamic_template_data: {
+          name: provider.name,
+        },
       });
 
       return res.status(201).send({ appointment, hourStart, parsedDate });
