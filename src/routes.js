@@ -12,6 +12,7 @@ import NotificationController from './app/controllers/NotificationController';
 
 import AuthMiddleware from './app/middlewares/auth';
 import ScheduleController from './app/controllers/ScheduleController';
+import AvailableController from './app/controllers/AvailableController';
 
 const routes = new Router();
 const upload = multer(multerConfig);
@@ -24,6 +25,7 @@ routes.use(AuthMiddleware);
 routes.put('/users', UserController.update);
 
 routes.get('/providers', ProviderController.index);
+routes.get('/providers/:id/available', AvailableController.index);
 
 routes.post('/appointments', AppointmentController.store);
 routes.get('/appointments', AppointmentController.index);
