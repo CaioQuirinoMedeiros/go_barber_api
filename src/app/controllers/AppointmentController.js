@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { isBefore, format, subHours } from 'date-fns';
+import { format, isPast } from 'date-fns';
 
 import { getAppointmentDate, getDateAsString } from '../helpers/date';
 
@@ -16,20 +16,20 @@ class AppointmentController {
       date: Yup.date().required(),
     });
 
-    const isValid = await schema.isValid(req.body);
+    const { provider_id, date } = req.body;
+
+    const isValid = await schema.isValid({ provider_id, date });
 
     if (!isValid) {
       return res.status(400).send({ error: 'Validation fails' });
     }
-
-    const { provider_id, date } = req.body;
 
     try {
       // Check if provider_id is the user himself
       if (req.userId === provider_id) {
         return res
           .status(400)
-          .send({ error: "you can't schedule an appointment with yourself" });
+          .send({ error: "You can't schedule an appointment with yourself" });
       }
 
       // Check if provider_id is a provider
@@ -37,18 +37,18 @@ class AppointmentController {
 
       if (!provider) {
         return res
-          .status(400)
-          .send({ error: 'Provider requested is not actually a provider' });
+          .status(404)
+          .send({ error: "Provider not found or it's not a provider" });
       }
 
       const appointmentDate = getAppointmentDate(date);
 
       // Check if it's a past date
-      if (isBefore(appointmentDate, new Date())) {
+      if (isPast(appointmentDate)) {
         return res.status(400).send({ error: "You can't go back in the past" });
       }
 
-      // Check if already existis an appointment in this date
+      // Check if already exists an appointment in this date
       const scheduledAppointment = await Appointment.findByProviderAndDate(
         provider_id,
         appointmentDate
@@ -98,7 +98,7 @@ class AppointmentController {
     const appointments = await Appointment.findAll({
       where: { user_id: req.userId, canceled_at: null },
       order: ['date'],
-      attributes: ['id', 'date'],
+      attributes: ['id', 'date', 'past', 'cancelable'],
       limit: 20,
       offset: (page - 1) * 20,
       include: [
@@ -132,9 +132,7 @@ class AppointmentController {
         });
       }
 
-      const dateWithSub = subHours(appointment.date, 2);
-
-      if (isBefore(dateWithSub, new Date())) {
+      if (!appointment.cancelable) {
         return res
           .status(400)
           .send({ error: 'Too late to cancel the appointment' });
