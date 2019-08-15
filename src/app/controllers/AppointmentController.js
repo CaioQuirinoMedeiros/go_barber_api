@@ -1,6 +1,7 @@
 import * as Yup from 'yup';
-import { startOfHour, parse, isBefore, format, subHours } from 'date-fns';
-import pt from 'date-fns/locale/pt';
+import { isBefore, format, subHours } from 'date-fns';
+
+import { getAppointmentDate, getDateAsString } from '../helpers/date';
 
 import Appointment from '../models/Appointment';
 import User from '../models/User';
@@ -40,19 +41,17 @@ class AppointmentController {
           .send({ error: 'Provider requested is not actually a provider' });
       }
 
-      const parsedDate = parse(date);
-
-      const hourStart = startOfHour(parsedDate);
+      const appointmentDate = getAppointmentDate(date);
 
       // Check if it's a past date
-      if (isBefore(hourStart, new Date())) {
+      if (isBefore(appointmentDate, new Date())) {
         return res.status(400).send({ error: "You can't go back in the past" });
       }
 
       // Check if already existis an appointment in this date
       const scheduledAppointment = await Appointment.findByProviderAndDate(
         provider_id,
-        hourStart
+        appointmentDate
       );
 
       if (scheduledAppointment) {
@@ -66,12 +65,10 @@ class AppointmentController {
       const appointment = await Appointment.create({
         user_id: user.id,
         provider_id,
-        date: format(hourStart),
+        date: format(appointmentDate),
       });
 
-      const formatedDate = format(hourStart, 'D [de] MMMM[, às] H:mm[h]', {
-        locale: pt,
-      });
+      const formatedDate = getDateAsString(appointmentDate);
 
       await Notification.create({
         content: `Novo agendamento de ${user.name} para o dia ${formatedDate}`,
@@ -80,15 +77,16 @@ class AppointmentController {
 
       await Mail.sendMail({
         subject: 'Novo agendamento',
-        text: `Novo agendamento de ${user.name} para o dia ${formatedDate}`,
         to: provider.email,
-        template_id: 'd-98b4482d2f4145cfaeb2f259aea20c7e',
+        template_id: 'd-2eabb272ccc24873b071469e7a7b5770',
         dynamic_template_data: {
-          name: provider.name,
+          provider: provider.name,
+          user: user.name,
+          date: formatedDate,
         },
       });
 
-      return res.status(201).send({ appointment, hourStart, parsedDate });
+      return res.status(201).send(appointment);
     } catch (err) {
       return res.status(400).send({ error: 'Unable to create appointment' });
     }
@@ -145,6 +143,29 @@ class AppointmentController {
       appointment.canceled_at = format(new Date());
 
       await appointment.save();
+
+      const provider = await User.findByPk(appointment.provider_id);
+      const user = await User.findByPk(req.userId);
+
+      await Notification.create({
+        content: `Atenção! O agendamento de ${
+          user.name
+        } para o dia ${getDateAsString(
+          appointment.date
+        )} foi cancelado. A data está disponível para novos agendamento`,
+        user: provider.id,
+      });
+
+      await Mail.sendMail({
+        subject: 'Agendamento cancelado',
+        to: provider.email,
+        template_id: 'd-98b4482d2f4145cfaeb2f259aea20c7e',
+        dynamic_template_data: {
+          provider: provider.name,
+          user: user.name,
+          date: getDateAsString(appointment.date),
+        },
+      });
 
       return res.status(200).send(appointment);
     } catch (err) {
