@@ -38,4 +38,8 @@ routes.put('/notifications/:id', NotificationController.update);
 
 routes.post('/files', upload.single('file'), FileController.store);
 
+routes.use((req, res) =>
+  res.status(400).send({ error: 'Nothing around here' })
+);
+
 export default routes;

@@ -16,6 +16,7 @@
     "date-fns": "^1.30.1",
     "dotenv": "^8.0.0",
     "express": "^4.17.1",
+    "express-async-errors": "^3.1.1",
     "express-handlebars": "^3.1.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.6.9",
@@ -24,6 +25,7 @@
     "pg": "^7.12.1",
     "pg-hstore": "^2.3.3",
     "sequelize": "^5.14.0",
+    "youch": "^2.0.10",
     "yup": "^0.27.0"
   },
   "devDependencies": {
