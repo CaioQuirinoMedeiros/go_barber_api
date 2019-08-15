@@ -1,5 +1,7 @@
 import * as Yup from 'yup';
+
 import User from '../models/User';
+import File from '../models/File';
 
 class UserController {
   async store(req, res) {
@@ -43,6 +45,7 @@ class UserController {
     const schema = Yup.object().shape({
       name: Yup.string(),
       email: Yup.string().email(),
+      avatar_id: Yup.number(),
       oldPassword: Yup.string(),
       password: Yup.string()
         .min(6)
@@ -85,7 +88,11 @@ class UserController {
         }
       }
 
-      user = await user.update(req.body);
+      await user.update(req.body);
+
+      user = await User.findByPk(user.id, {
+        include: [{ model: File, as: 'avatar' }],
+      });
 
       return res.status(200).send(user);
     } catch (err) {
