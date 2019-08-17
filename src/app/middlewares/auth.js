@@ -8,7 +8,7 @@ export default async (req, res, next) => {
     const authHeader = req.header('Authorization');
 
     if (!authHeader) {
-      return res.status(401).send({ error: 'No token provided' });
+      return res.status(401).send({ error: 'É necessário estar autenticado' });
     }
 
     const token = authHeader.replace('Bearer ', '');
@@ -25,6 +25,6 @@ export default async (req, res, next) => {
 
     return next();
   } catch (err) {
-    return res.status(401).send({ error: 'Invalid token' });
+    return res.status(401).send({ error: 'Falha na autenticação' });
   }
 };

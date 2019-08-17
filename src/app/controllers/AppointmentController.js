@@ -12,16 +12,18 @@ import Mail from '../../services/Mail';
 class AppointmentController {
   async store(req, res) {
     const schema = Yup.object().shape({
-      provider_id: Yup.number().required(),
-      date: Yup.date().required(),
+      provider_id: Yup.number().required('Especifique o prestador'),
+      date: Yup.date('Não é uma data válida').required(
+        'Especifique uma data e horário'
+      ),
     });
 
     const { provider_id, date } = req.body;
 
-    const isValid = await schema.isValid({ provider_id, date });
-
-    if (!isValid) {
-      return res.status(400).send({ error: 'Validation fails' });
+    try {
+      await schema.validate({ provider_id, date });
+    } catch (err) {
+      return res.status(400).send({ error: err.message });
     }
 
     try {
@@ -29,7 +31,7 @@ class AppointmentController {
       if (req.userId === provider_id) {
         return res
           .status(400)
-          .send({ error: "You can't schedule an appointment with yourself" });
+          .send({ error: 'Impossível agendar com você mesmo' });
       }
 
       // Check if provider_id is a provider
@@ -38,14 +40,16 @@ class AppointmentController {
       if (!provider) {
         return res
           .status(404)
-          .send({ error: "Provider not found or it's not a provider" });
+          .send({ error: 'Usuário requisitado não é um prestador' });
       }
 
       const appointmentDate = getAppointmentDate(date);
 
       // Check if it's a past date
       if (isPast(appointmentDate)) {
-        return res.status(400).send({ error: "You can't go back in the past" });
+        return res
+          .status(400)
+          .send({ error: 'Você não pode voltar no passado' });
       }
 
       // Check if already exists an appointment in this date
@@ -55,9 +59,7 @@ class AppointmentController {
       );
 
       if (scheduledAppointment) {
-        return res
-          .status(400)
-          .send({ error: 'Appointment date is not available' });
+        return res.status(400).send({ error: 'Horário não disponível' });
       }
 
       const user = await User.findByPk(req.userId);
@@ -88,32 +90,36 @@ class AppointmentController {
 
       return res.status(201).send(appointment);
     } catch (err) {
-      return res.status(400).send({ error: 'Unable to create appointment' });
+      return res.status(400).send({ error: 'Erro ao marcar consulta' });
     }
   }
 
   async index(req, res) {
     const { page = 1 } = req.query;
 
-    const appointments = await Appointment.findAll({
-      where: { user_id: req.userId, canceled_at: null },
-      order: ['date'],
-      attributes: ['id', 'date', 'past', 'cancelable'],
-      limit: 20,
-      offset: (page - 1) * 20,
-      include: [
-        {
-          model: User,
-          as: 'provider',
-          attributes: ['id', 'name'],
-          include: [
-            { model: File, as: 'avatar', attributes: ['id', 'path', 'url'] },
-          ],
-        },
-      ],
-    });
+    try {
+      const appointments = await Appointment.findAll({
+        where: { user_id: req.userId, canceled_at: null },
+        order: ['date'],
+        attributes: ['id', 'date', 'past', 'cancelable'],
+        limit: 20,
+        offset: (page - 1) * 20,
+        include: [
+          {
+            model: User,
+            as: 'provider',
+            attributes: ['id', 'name'],
+            include: [
+              { model: File, as: 'avatar', attributes: ['id', 'path', 'url'] },
+            ],
+          },
+        ],
+      });
 
-    return res.status(200).send(appointments);
+      return res.status(200).send(appointments);
+    } catch (err) {
+      return res.status(400).send({ error: 'Erro ao buscar suas consultas' });
+    }
   }
 
   async delete(req, res) {
@@ -123,19 +129,19 @@ class AppointmentController {
       const appointment = await Appointment.findByPk(id);
 
       if (!appointment) {
-        return res.status(404).send({ error: 'Appointment not found' });
+        return res.status(404).send({ error: 'Consulta não encontrada' });
       }
 
       if (appointment.user_id !== req.userId) {
         return res.status(401).send({
-          error: "You don't have permission to cancel this appointment",
+          error: 'Você não tem permissão para cancelar essa consulta',
         });
       }
 
       if (!appointment.cancelable) {
         return res
           .status(400)
-          .send({ error: 'Too late to cancel the appointment' });
+          .send({ error: 'Tarde demais para cancelar consulta' });
       }
 
       appointment.canceled_at = format(new Date());
@@ -167,7 +173,7 @@ class AppointmentController {
 
       return res.status(200).send(appointment);
     } catch (err) {
-      return res.status(400).send({ error: 'Unable to cancel appointment' });
+      return res.status(400).send({ error: 'Erro ao cancelar consulta' });
     }
   }
 }

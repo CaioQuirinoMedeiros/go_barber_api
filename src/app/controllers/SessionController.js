@@ -7,17 +7,17 @@ class SessionController {
   async store(req, res) {
     const schema = Yup.object().shape({
       email: Yup.string()
-        .email()
-        .required(),
-      password: Yup.string().required(),
+        .email('Não é um email válido')
+        .required('Forneça seu email'),
+      password: Yup.string().required('Forneça sua senha secreta'),
     });
 
     const { email, password } = req.body;
 
-    const isValid = await schema.isValid(req.body);
-
-    if (!isValid) {
-      return res.status(400).send({ error: 'Validation fails' });
+    try {
+      await schema.validate(req.body);
+    } catch (err) {
+      return res.status(400).send({ error: err.message });
     }
 
     try {
@@ -29,22 +29,20 @@ class SessionController {
       });
 
       if (!user) {
-        return res.status(404).send({ error: 'User not found' });
+        return res.status(404).send({ error: 'Usuário não encontrado' });
       }
 
       const passwordMatch = await user.checkPassword(password);
 
       if (!passwordMatch) {
-        return res.status(401).send({ error: 'Invalid password' });
+        return res.status(401).send({ error: 'Senha inválida' });
       }
 
       const token = await user.generateJWT();
 
       return res.status(201).send({ user, token });
     } catch (err) {
-      return res
-        .status(400)
-        .send({ error: err.message || 'Invalid credentials' });
+      return res.status(400).send({ error: 'Erro ao se autenticar' });
     }
   }
 }

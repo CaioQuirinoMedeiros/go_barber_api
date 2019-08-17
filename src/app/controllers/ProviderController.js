@@ -13,7 +13,7 @@ class ProviderCotroller {
 
       return res.status(200).send(providers);
     } catch (err) {
-      return res.status(400).send({ error: 'Unable to get providers' });
+      return res.status(400).send({ error: 'Erro ao buscar prestadores' });
     }
   }
 }

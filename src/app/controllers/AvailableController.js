@@ -17,7 +17,7 @@ class AvailableController {
     const { id } = req.params;
 
     if (!date) {
-      return res.status(400).send({ error: 'Invalid date' });
+      return res.status(400).send({ error: 'Data inválida' });
     }
 
     const searchDate = parseInt(date, 10);
@@ -68,7 +68,9 @@ class AvailableController {
 
       return res.status(200).send(available);
     } catch (err) {
-      return res.status(400).send({ error: 'Unable to get available dates' });
+      return res
+        .status(400)
+        .send({ error: 'Erro ao buscar horários disponíveis' });
     }
   }
 }

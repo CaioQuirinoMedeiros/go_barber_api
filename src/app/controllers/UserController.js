@@ -6,29 +6,33 @@ import File from '../models/File';
 class UserController {
   async store(req, res) {
     const schema = Yup.object().shape({
-      name: Yup.string().required(),
+      name: Yup.string().required('O nome é obrigatório'),
       email: Yup.string()
-        .email()
-        .required(),
+        .email('O email não é um email válido')
+        .required('O email é obrigatório'),
       password: Yup.string()
-        .min(6)
-        .required(),
+        .min(6, 'A senha deve ter no mínimo 6 dígitos')
+        .required('A senha é obrigatória'),
       passwordConfirmation: Yup.string().when('password', (password, field) =>
-        password ? field.required().oneOf([Yup.ref('password')]) : field
+        password
+          ? field
+              .required('É necessário confirmar a senha')
+              .oneOf([Yup.ref('password')], 'As senhas não conferem')
+          : field
       ),
     });
 
-    const isValid = await schema.isValid(req.body);
-
-    if (!isValid) {
-      return res.status(400).send({ error: 'Validation fails' });
+    try {
+      await schema.validate(req.body);
+    } catch (err) {
+      return res.status(400).send({ error: err.message });
     }
 
     try {
       const userExists = await User.findByEmail(req.body.email);
 
       if (userExists) {
-        return res.status(400).send({ error: 'User already exists' });
+        return res.status(400).send({ error: 'Usuário já existe' });
       }
 
       const user = await User.create(req.body);
@@ -37,32 +41,34 @@ class UserController {
 
       return res.status(200).send({ id, name, email, provider });
     } catch (err) {
-      return res.status(400).send({ error: 'Unable to create user' });
+      return res.status(400).send({ error: 'Erro ao criar usuário' });
     }
   }
 
   async update(req, res) {
     const schema = Yup.object().shape({
       name: Yup.string(),
-      email: Yup.string().email(),
+      email: Yup.string().email('O email não é válido'),
       avatar_id: Yup.number(),
-      oldPassword: Yup.string(),
-      password: Yup.string()
-        .min(6)
-        .when('oldPassword', (oldPassword, field) =>
-          oldPassword ? field.required() : field
-        ),
+      oldPassword: Yup.string().when('password', (password, field) =>
+        password ? field.required('É necessário fornecer a senha atual') : field
+      ),
+      password: Yup.string().min(6, 'A senha deve ter no mínimo 6 dígitos'),
       passwordConfirmation: Yup.string().when('password', (password, field) =>
-        password ? field.required().oneOf([Yup.ref('password')]) : field
+        password
+          ? field
+              .required('É necessário confirmar a nova senha')
+              .oneOf([Yup.ref('password')], 'As senhas não conferem')
+          : field
       ),
     });
 
     const { email, oldPassword, password } = req.body;
 
-    const isValid = await schema.isValid(req.body);
-
-    if (!isValid) {
-      return res.status(400).send({ error: 'Validation fails' });
+    try {
+      await schema.validate(req.body);
+    } catch (err) {
+      return res.status(400).send({ error: err.message });
     }
 
     try {
@@ -72,19 +78,21 @@ class UserController {
         const userExists = await User.findByEmail(email);
 
         if (userExists) {
-          return res.status(400).send({ error: 'User already exists' });
+          return res.status(400).send({ error: 'Usuário já existe' });
         }
       }
 
       if (password) {
         if (!oldPassword) {
-          return res.status(401).send({ error: 'Must provide old password' });
+          return res
+            .status(401)
+            .send({ error: 'Necessário fornecer senha atual' });
         }
 
         const passwordMatch = await user.checkPassword(oldPassword);
 
         if (!passwordMatch) {
-          return res.status(401).send({ error: 'Invalid password' });
+          return res.status(401).send({ error: 'Senha inválida' });
         }
       }
 
@@ -96,7 +104,7 @@ class UserController {
 
       return res.status(200).send(user);
     } catch (err) {
-      return res.status(400).send({ error: 'Unable to update user' });
+      return res.status(400).send({ error: 'Erro ao editar usuário' });
     }
   }
 }

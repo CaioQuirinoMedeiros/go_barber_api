@@ -9,7 +9,7 @@ class NotificationController {
       if (!provider) {
         return res
           .status(400)
-          .send({ error: 'Only providers can load notifications' });
+          .send({ error: 'Apenas prestadores podem ver notificações' });
       }
 
       const notifications = await Notification.find({ user: req.userId })
@@ -18,7 +18,7 @@ class NotificationController {
 
       return res.status(200).send(notifications);
     } catch (err) {
-      return res.status(400).send({ error: 'Unable to get notifications' });
+      return res.status(400).send({ error: 'Erro ao buscar notificações' });
     }
   }
 
@@ -33,12 +33,14 @@ class NotificationController {
       );
 
       if (!notification) {
-        return res.status(404).send({ error: 'Notification not found' });
+        return res.status(404).send({ error: 'Notificação não encontrada' });
       }
 
       return res.status(200).send(notification);
     } catch (err) {
-      return res.status(400).send({ error: 'Unable to update notification' });
+      return res
+        .status(400)
+        .send({ error: 'Erro ao marcar notificação como lida' });
     }
   }
 }

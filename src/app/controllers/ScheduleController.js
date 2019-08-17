@@ -10,7 +10,7 @@ class ScheduleController {
       const provider = await User.findProvider(req.userId);
 
       if (!provider) {
-        return res.status(400).send({ error: 'User is not a provider' });
+        return res.status(400).send({ error: 'Usuário não é um prestador' });
       }
 
       const { date } = req.query;
@@ -31,7 +31,7 @@ class ScheduleController {
 
       return res.status(200).send(appointments);
     } catch (err) {
-      return res.status(400).send({ error: 'Unable to get schedule' });
+      return res.status(400).send({ error: 'Erro ao buscar cronograma' });
     }
   }
 }
