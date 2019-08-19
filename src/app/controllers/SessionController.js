@@ -1,24 +1,9 @@
-import * as Yup from 'yup';
-
 import User from '../models/User';
 import File from '../models/File';
 
 class SessionController {
   async store(req, res) {
-    const schema = Yup.object().shape({
-      email: Yup.string()
-        .email('Não é um email válido')
-        .required('Forneça seu email'),
-      password: Yup.string().required('Forneça sua senha secreta'),
-    });
-
     const { email, password } = req.body;
-
-    try {
-      await schema.validate(req.body);
-    } catch (err) {
-      return res.status(400).send({ error: err.message });
-    }
 
     try {
       const user = await User.findOne({

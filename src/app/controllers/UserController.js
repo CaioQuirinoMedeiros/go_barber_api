@@ -1,33 +1,8 @@
-import * as Yup from 'yup';
-
 import User from '../models/User';
 import File from '../models/File';
 
 class UserController {
   async store(req, res) {
-    const schema = Yup.object().shape({
-      name: Yup.string().required('O nome é obrigatório'),
-      email: Yup.string()
-        .email('O email não é um email válido')
-        .required('O email é obrigatório'),
-      password: Yup.string()
-        .min(6, 'A senha deve ter no mínimo 6 dígitos')
-        .required('A senha é obrigatória'),
-      passwordConfirmation: Yup.string().when('password', (password, field) =>
-        password
-          ? field
-              .required('É necessário confirmar a senha')
-              .oneOf([Yup.ref('password')], 'As senhas não conferem')
-          : field
-      ),
-    });
-
-    try {
-      await schema.validate(req.body);
-    } catch (err) {
-      return res.status(400).send({ error: err.message });
-    }
-
     try {
       const userExists = await User.findByEmail(req.body.email);
 
@@ -46,30 +21,7 @@ class UserController {
   }
 
   async update(req, res) {
-    const schema = Yup.object().shape({
-      name: Yup.string(),
-      email: Yup.string().email('O email não é válido'),
-      avatar_id: Yup.number(),
-      oldPassword: Yup.string().when('password', (password, field) =>
-        password ? field.required('É necessário fornecer a senha atual') : field
-      ),
-      password: Yup.string().min(6, 'A senha deve ter no mínimo 6 dígitos'),
-      passwordConfirmation: Yup.string().when('password', (password, field) =>
-        password
-          ? field
-              .required('É necessário confirmar a nova senha')
-              .oneOf([Yup.ref('password')], 'As senhas não conferem')
-          : field
-      ),
-    });
-
-    const { email, oldPassword, password } = req.body;
-
-    try {
-      await schema.validate(req.body);
-    } catch (err) {
-      return res.status(400).send({ error: err.message });
-    }
+    const { email, password, oldPassword } = req.body;
 
     try {
       let user = await User.findByPk(req.userId);

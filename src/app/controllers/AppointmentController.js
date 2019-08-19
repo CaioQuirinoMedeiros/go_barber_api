@@ -1,4 +1,3 @@
-import * as Yup from 'yup';
 import { format, isPast } from 'date-fns';
 
 import { getAppointmentDate, getDateAsString } from '../helpers/date';
@@ -11,21 +10,7 @@ import Mail from '../../services/Mail';
 
 class AppointmentController {
   async store(req, res) {
-    const schema = Yup.object().shape({
-      provider_id: Yup.number().required('Especifique o prestador'),
-      date: Yup.date('Não é uma data válida').required(
-        'Especifique uma data e horário'
-      ),
-    });
-
     const { provider_id, date } = req.body;
-
-    try {
-      await schema.validate({ provider_id, date });
-    } catch (err) {
-      return res.status(400).send({ error: err.message });
-    }
-
     try {
       // Check if provider_id is the user himself
       if (req.userId === provider_id) {
