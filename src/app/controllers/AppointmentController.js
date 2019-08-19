@@ -1,14 +1,9 @@
-import { format } from 'date-fns';
-
-import { getDateAsString } from '../helpers/date';
-
 import Appointment from '../models/Appointment';
 import User from '../models/User';
 import File from '../models/File';
-import Notification from '../schemas/Notification';
-import Mail from '../../services/Mail';
 
 import CreateAppointmentService from '../services/CreateAppointmentService';
+import CancelAppointmentService from '../services/CancelAppointmentService';
 
 class AppointmentController {
   async store(req, res) {
@@ -60,54 +55,16 @@ class AppointmentController {
     const { id } = req.params;
 
     try {
-      const appointment = await Appointment.findByPk(id);
-
-      if (!appointment) {
-        return res.status(404).send({ error: 'Consulta não encontrada' });
-      }
-
-      if (appointment.user_id !== req.userId) {
-        return res.status(401).send({
-          error: 'Você não tem permissão para cancelar essa consulta',
-        });
-      }
-
-      if (!appointment.cancelable) {
-        return res
-          .status(400)
-          .send({ error: 'Tarde demais para cancelar consulta' });
-      }
-
-      appointment.canceled_at = format(new Date());
-
-      await appointment.save();
-
-      const provider = await User.findByPk(appointment.provider_id);
-      const user = await User.findByPk(req.userId);
-
-      await Notification.create({
-        content: `Atenção! O agendamento de ${
-          user.name
-        } para o dia ${getDateAsString(
-          appointment.date
-        )} foi cancelado. A data está disponível para novos agendamento`,
-        user: provider.id,
-      });
-
-      await Mail.sendMail({
-        subject: 'Agendamento cancelado',
-        to: provider.email,
-        template_id: 'd-98b4482d2f4145cfaeb2f259aea20c7e',
-        dynamic_template_data: {
-          provider: provider.name,
-          user: user.name,
-          date: getDateAsString(appointment.date),
-        },
+      const appointment = await CancelAppointmentService.run({
+        appointment_id: id,
+        user_id: req.userId,
       });
 
       return res.status(200).send(appointment);
     } catch (err) {
-      return res.status(400).send({ error: 'Erro ao cancelar consulta' });
+      return res
+        .status(400)
+        .send({ error: err.message || 'Erro ao cancelar consulta' });
     }
   }
 }
