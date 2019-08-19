@@ -22,7 +22,9 @@ class AppointmentController {
 
       return res.status(201).send(appointment);
     } catch (err) {
-      return res.status(400).send({ error: 'Erro ao marcar consulta' });
+      return res
+        .status(400)
+        .send({ error: err.message || 'Erro ao marcar consulta' });
     }
   }
 
