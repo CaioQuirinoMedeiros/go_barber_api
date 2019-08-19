@@ -1,6 +1,6 @@
-import { format, isPast } from 'date-fns';
+import { format } from 'date-fns';
 
-import { getAppointmentDate, getDateAsString } from '../helpers/date';
+import { getDateAsString } from '../helpers/date';
 
 import Appointment from '../models/Appointment';
 import User from '../models/User';
@@ -8,69 +8,16 @@ import File from '../models/File';
 import Notification from '../schemas/Notification';
 import Mail from '../../services/Mail';
 
+import CreateAppointmentService from '../services/CreateAppointmentService';
+
 class AppointmentController {
   async store(req, res) {
     const { provider_id, date } = req.body;
     try {
-      // Check if provider_id is the user himself
-      if (req.userId === provider_id) {
-        return res
-          .status(400)
-          .send({ error: 'Impossível agendar com você mesmo' });
-      }
-
-      // Check if provider_id is a provider
-      const provider = await User.findProvider(provider_id);
-
-      if (!provider) {
-        return res
-          .status(404)
-          .send({ error: 'Usuário requisitado não é um prestador' });
-      }
-
-      const appointmentDate = getAppointmentDate(date);
-
-      // Check if it's a past date
-      if (isPast(appointmentDate)) {
-        return res
-          .status(400)
-          .send({ error: 'Você não pode voltar no passado' });
-      }
-
-      // Check if already exists an appointment in this date
-      const scheduledAppointment = await Appointment.findByProviderAndDate(
+      const appointment = await CreateAppointmentService.run({
+        user_id: req.userId,
         provider_id,
-        appointmentDate
-      );
-
-      if (scheduledAppointment) {
-        return res.status(400).send({ error: 'Horário não disponível' });
-      }
-
-      const user = await User.findByPk(req.userId);
-
-      const appointment = await Appointment.create({
-        user_id: user.id,
-        provider_id,
-        date: format(appointmentDate),
-      });
-
-      const formatedDate = getDateAsString(appointmentDate);
-
-      await Notification.create({
-        content: `Novo agendamento de ${user.name} para o dia ${formatedDate}`,
-        user: provider_id,
-      });
-
-      await Mail.sendMail({
-        subject: 'Novo agendamento',
-        to: provider.email,
-        template_id: 'd-2eabb272ccc24873b071469e7a7b5770',
-        dynamic_template_data: {
-          provider: provider.name,
-          user: user.name,
-          date: formatedDate,
-        },
+        date,
       });
 
       return res.status(201).send(appointment);
