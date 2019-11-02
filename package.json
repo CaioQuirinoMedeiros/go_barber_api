@@ -26,7 +26,7 @@
     "nodemailer": "^6.3.0",
     "pg": "^7.12.1",
     "pg-hstore": "^2.3.3",
-    "sequelize": "^5.14.0",
+    "sequelize": "^5.15.1",
     "sequelize-cli": "^5.5.0",
     "sucrase": "^3.10.1",
     "youch": "^2.0.10",
