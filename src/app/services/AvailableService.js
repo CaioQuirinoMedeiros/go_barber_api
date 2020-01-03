@@ -44,7 +44,7 @@ class AvailableService {
 
       return {
         time,
-        value: format(value, 'YYYY-MM-DD[T]HH:mm:ssZ'),
+        value: format(value, 'yyyy-MM-dd HH:mm:ss'),
         available:
           isAfter(value, new Date()) &&
           !appointments.find(
