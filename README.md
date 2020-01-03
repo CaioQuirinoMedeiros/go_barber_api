@@ -16,7 +16,7 @@ This API feed a [mobile app](https://github.com/CaioQuirinoMedeiros/go_barber_ap
 - List service providers and their avaiable schedules
 - Register/cancel an appointment with a service provider
 
-**:notebook: For providers**
+**:computer: For providers**
 - Show schedule
 - Email/Notifications of new appointments
 
