@@ -24,7 +24,7 @@ class CancelAppointmentService {
       throw new Error('Tarde demais para cancelar consulta');
     }
 
-    appointment.canceled_at = format(new Date());
+    appointment.canceled_at = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
 
     await appointment.save();
 

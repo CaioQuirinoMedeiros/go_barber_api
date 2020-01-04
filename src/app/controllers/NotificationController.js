@@ -18,6 +18,7 @@ class NotificationController {
 
       return res.status(200).send(notifications);
     } catch (err) {
+      console.error(err);
       return res.status(400).send({ error: 'Erro ao buscar notificações' });
     }
   }
@@ -38,6 +39,7 @@ class NotificationController {
 
       return res.status(200).send(notification);
     } catch (err) {
+      console.error(err);
       return res
         .status(400)
         .send({ error: 'Erro ao marcar notificação como lida' });

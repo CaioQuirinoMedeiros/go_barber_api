@@ -9,6 +9,7 @@ class FileController {
 
       return res.status(201).send(file);
     } catch (err) {
+      console.error(err);
       return res.status(400).send({ error: 'Erro ao salvar imagem' });
     }
   }
