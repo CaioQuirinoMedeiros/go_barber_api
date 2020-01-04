@@ -48,6 +48,7 @@ class AppointmentController {
 
       return res.status(200).send(appointments);
     } catch (err) {
+      console.error(err);
       return res.status(400).send({ error: 'Erro ao buscar suas consultas' });
     }
   }
@@ -63,6 +64,7 @@ class AppointmentController {
 
       return res.status(200).send(appointment);
     } catch (err) {
+      console.error(err);
       return res
         .status(400)
         .send({ error: err.message || 'Erro ao cancelar consulta' });

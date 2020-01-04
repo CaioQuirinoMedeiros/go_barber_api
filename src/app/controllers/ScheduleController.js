@@ -31,6 +31,7 @@ class ScheduleController {
 
       return res.status(200).send(appointments);
     } catch (err) {
+      console.error(err);
       return res.status(400).send({ error: 'Erro ao buscar cronograma' });
     }
   }

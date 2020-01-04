@@ -44,7 +44,7 @@ class CreateAppointmentServices {
     const appointment = await Appointment.create({
       user_id: user.id,
       provider_id,
-      date: format(appointmentDate),
+      date: format(appointmentDate, 'yyyy-MM-dd HH:mm:ss'),
     });
 
     const formatedDate = getDateAsString(appointmentDate);
