@@ -22,7 +22,7 @@ This API feed a [mobile app](https://github.com/CaioQuirinoMedeiros/go_barber_ap
 
 ### Try it
 
-I deployed this project on heroku, check it out: (https://go-barber-api-caio.herokuapp.com)
+I deployed this project on heroku, check it out: https://go-barber-api-caio.herokuapp.com
 
 ## Getting started
 
