@@ -20,6 +20,9 @@ This API feed a [mobile app](https://github.com/CaioQuirinoMedeiros/go_barber_ap
 - Show schedule
 - Email/Notifications of new appointments
 
+### Try it
+
+I deployed this project on heroku, check it out: (https://go-barber-api-caio.herokuapp.com)
 
 ## Getting started
 
