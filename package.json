@@ -10,6 +10,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": "13.x.x"
+  },
   "dependencies": {
     "@sendgrid/mail": "^6.4.0",
     "bcryptjs": "^2.4.3",
