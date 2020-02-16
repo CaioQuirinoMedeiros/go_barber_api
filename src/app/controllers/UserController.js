@@ -1,3 +1,6 @@
+import { unlink } from 'fs'
+import { resolve } from 'path'
+
 import User from '../models/User'
 import File from '../models/File'
 
@@ -59,6 +62,42 @@ class UserController {
     } catch (err) {
       console.error(err)
       return res.status(400).send({ error: 'Erro ao editar usuário' })
+    }
+  }
+
+  async removeAvatar(req, res) {
+    const { user } = req
+
+    if (!user.avatar) {
+      return res.status(400).send({ error: 'Não possui avatar para remover' })
+    }
+
+    try {
+      const imagePath = resolve(
+        __dirname,
+        '..',
+        '..',
+        '..',
+        'tmp',
+        'uploads',
+        user.avatar.path
+      )
+
+      await File.destroy({ where: { id: user.avatar_id } })
+      await user.update({ avatar_id: null })
+
+      unlink(imagePath, err => {
+        if (err) {
+          console.error('Não foi possivel remover a imagem', err)
+        } else {
+          console.log('Imagem removida: ', imagePath)
+        }
+      })
+
+      return res.status(200).send()
+    } catch (err) {
+      console.error(err)
+      return res.status(400).send({ error: 'Erro ao remover avatar' })
     }
   }
 }

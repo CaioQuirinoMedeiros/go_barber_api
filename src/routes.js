@@ -28,6 +28,7 @@ routes.post('/sessions', validateSessionStore, SessionController.store)
 routes.use(AuthMiddleware)
 
 routes.put('/users', validateUserUpdate, UserController.update)
+routes.delete('/users/avatar', UserController.removeAvatar)
 
 routes.get('/providers', ProviderController.index)
 routes.get('/providers/:id/available', AvailableController.index)

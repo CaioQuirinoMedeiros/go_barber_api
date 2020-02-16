@@ -15,13 +15,14 @@ export default async (req, res, next) => {
 
     const decoded = await jwt.verify(token, authConfig.secret)
 
-    const user = await User.findByPk(decoded.id)
+    const user = await User.findByPk(decoded.id, { include: ['avatar'] })
 
     if (!user) {
       throw new Error()
     }
 
     req.userId = user.id
+    req.user = user
 
     return next()
   } catch (err) {

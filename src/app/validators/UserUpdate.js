@@ -5,7 +5,7 @@ export default async (req, res, next) => {
     const schema = Yup.object().shape({
       name: Yup.string(),
       email: Yup.string().email('O email não é válido'),
-      avatar_id: Yup.number(),
+      avatar_id: Yup.number().nullable(),
       oldPassword: Yup.string().when('password', (password, field) =>
         password ? field.required('É necessário fornecer a senha atual') : field
       ),
