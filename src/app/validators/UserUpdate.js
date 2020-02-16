@@ -1,4 +1,4 @@
-import * as Yup from 'yup';
+import * as Yup from 'yup'
 
 export default async (req, res, next) => {
   try {
@@ -17,11 +17,11 @@ export default async (req, res, next) => {
               .oneOf([Yup.ref('password')], 'As senhas não conferem')
           : field
       ),
-    });
+    })
 
-    await schema.validate(req.body);
-    return next();
+    await schema.validate(req.body)
+    return next()
   } catch (err) {
-    return res.status(400).send({ error: err.message });
+    return res.status(400).send({ error: err.message })
   }
-};
+}

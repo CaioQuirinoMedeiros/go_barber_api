@@ -1,30 +1,30 @@
-import jwt from 'jsonwebtoken';
-import User from '../models/User';
+import jwt from 'jsonwebtoken'
+import User from '../models/User'
 
-import authConfig from '../../config/auth';
+import authConfig from '../../config/auth'
 
 export default async (req, res, next) => {
   try {
-    const authHeader = req.header('Authorization');
+    const authHeader = req.header('Authorization')
 
     if (!authHeader) {
-      return res.status(401).send({ error: 'É necessário estar autenticado' });
+      return res.status(401).send({ error: 'É necessário estar autenticado' })
     }
 
-    const token = authHeader.replace('Bearer ', '');
+    const token = authHeader.replace('Bearer ', '')
 
-    const decoded = await jwt.verify(token, authConfig.secret);
+    const decoded = await jwt.verify(token, authConfig.secret)
 
-    const user = await User.findByPk(decoded.id);
+    const user = await User.findByPk(decoded.id)
 
     if (!user) {
-      throw new Error();
+      throw new Error()
     }
 
-    req.userId = user.id;
+    req.userId = user.id
 
-    return next();
+    return next()
   } catch (err) {
-    return res.status(401).send({ error: 'Falha na autenticação' });
+    return res.status(401).send({ error: 'Falha na autenticação' })
   }
-};
+}

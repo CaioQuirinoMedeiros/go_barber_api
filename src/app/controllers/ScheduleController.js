@@ -1,21 +1,21 @@
-import { Op } from 'sequelize';
-import { startOfDay, endOfDay, parse } from 'date-fns';
+import { Op } from 'sequelize'
+import { startOfDay, endOfDay, parse } from 'date-fns'
 
-import Appointment from '../models/Appointment';
-import User from '../models/User';
+import Appointment from '../models/Appointment'
+import User from '../models/User'
 
 class ScheduleController {
   async index(req, res) {
     try {
-      const provider = await User.findProvider(req.userId);
+      const provider = await User.findProvider(req.userId)
 
       if (!provider) {
-        return res.status(400).send({ error: 'Usuário não é um prestador' });
+        return res.status(400).send({ error: 'Usuário não é um prestador' })
       }
 
-      const { date } = req.query;
+      const { date } = req.query
 
-      const parsedDate = parse(date);
+      const parsedDate = parse(date)
 
       const appointments = await Appointment.findAll({
         where: {
@@ -27,14 +27,14 @@ class ScheduleController {
         },
         include: [{ model: User, as: 'user', attributes: ['name'] }],
         order: ['date'],
-      });
+      })
 
-      return res.status(200).send(appointments);
+      return res.status(200).send(appointments)
     } catch (err) {
-      console.error(err);
-      return res.status(400).send({ error: 'Erro ao buscar cronograma' });
+      console.error(err)
+      return res.status(400).send({ error: 'Erro ao buscar cronograma' })
     }
   }
 }
 
-export default new ScheduleController();
+export default new ScheduleController()

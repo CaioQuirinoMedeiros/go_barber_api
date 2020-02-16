@@ -3,4 +3,4 @@ export default {
   default: {
     from: 'caio.quirino.medeiros@gmail.com',
   },
-};
+}

@@ -37,10 +37,10 @@ module.exports = {
         type: Sequelize.DATE,
         allowNull: false,
       },
-    });
+    })
   },
 
   down: queryInterface => {
-    return queryInterface.dropTable('appointments');
+    return queryInterface.dropTable('appointments')
   },
-};
+}
