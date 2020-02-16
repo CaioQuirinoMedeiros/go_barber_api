@@ -15,7 +15,7 @@ class ScheduleController {
 
       const { date } = req.query
 
-      const parsedDate = parse(date)
+      const parsedDate = parse(date, 'yyyy-MM-dd', new Date(date))
 
       const appointments = await Appointment.findAll({
         where: {
