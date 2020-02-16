@@ -1,5 +1,5 @@
 import { Op } from 'sequelize'
-import { startOfDay, endOfDay, parse } from 'date-fns'
+import { startOfDay, endOfDay, parseISO } from 'date-fns'
 
 import Appointment from '../models/Appointment'
 import User from '../models/User'
@@ -15,7 +15,7 @@ class ScheduleController {
 
       const { date } = req.query
 
-      const parsedDate = parse(date, 'yyyy-MM-dd', new Date(date))
+      const parsedDate = parseISO(date)
 
       const appointments = await Appointment.findAll({
         where: {
