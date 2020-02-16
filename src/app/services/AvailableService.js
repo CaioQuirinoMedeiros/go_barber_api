@@ -6,10 +6,10 @@ import {
   setMinutes,
   setHours,
   isAfter,
-} from 'date-fns';
-import { Op } from 'sequelize';
+} from 'date-fns'
+import { Op } from 'sequelize'
 
-import Appointment from '../models/Appointment';
+import Appointment from '../models/Appointment'
 
 class AvailableService {
   async run({ date, provider_id }) {
@@ -21,7 +21,7 @@ class AvailableService {
           [Op.between]: [startOfDay(date), endOfDay(date)],
         },
       },
-    });
+    })
 
     const schedule = [
       '08:00',
@@ -35,26 +35,26 @@ class AvailableService {
       '16:00',
       '17:00',
       '18:00',
-    ];
+    ]
 
     const available = schedule.map(time => {
-      const [hour, minute] = time.split(':');
+      const [hour, minute] = time.split(':')
 
-      const value = setSeconds(setMinutes(setHours(date, hour), minute), 0);
+      const value = setSeconds(setMinutes(setHours(date, hour), minute), 0)
 
       return {
         time,
-        value: format(value, 'yyyy-MM-dd HH:mm:ss'),
+        value: value.toISOString(),
         available:
           isAfter(value, new Date()) &&
           !appointments.find(
             appointment => format(appointment.date, 'HH:mm') === time
           ),
-      };
-    });
+      }
+    })
 
-    return available;
+    return available
   }
 }
 
-export default new AvailableService();
+export default new AvailableService()

@@ -1,31 +1,32 @@
-import Appointment from '../models/Appointment';
-import User from '../models/User';
-import File from '../models/File';
+import Appointment from '../models/Appointment'
+import User from '../models/User'
+import File from '../models/File'
 
-import CreateAppointmentService from '../services/CreateAppointmentService';
-import CancelAppointmentService from '../services/CancelAppointmentService';
+import CreateAppointmentService from '../services/CreateAppointmentService'
+import CancelAppointmentService from '../services/CancelAppointmentService'
 
 class AppointmentController {
   async store(req, res) {
-    const { provider_id, date } = req.body;
+    const { provider_id, date } = req.body
+
     try {
       const appointment = await CreateAppointmentService.run({
         user_id: req.userId,
         provider_id,
         date,
-      });
+      })
 
-      return res.status(201).send(appointment);
+      return res.status(201).send(appointment)
     } catch (err) {
-      console.error(err);
+      console.error(err)
       return res
         .status(400)
-        .send({ error: err.message || 'Erro ao marcar consulta' });
+        .send({ error: err.message || 'Erro ao marcar consulta' })
     }
   }
 
   async index(req, res) {
-    const { page = 1 } = req.query;
+    const { page = 1 } = req.query
 
     try {
       const appointments = await Appointment.findAll({
@@ -44,32 +45,32 @@ class AppointmentController {
             ],
           },
         ],
-      });
+      })
 
-      return res.status(200).send(appointments);
+      return res.status(200).send(appointments)
     } catch (err) {
-      console.error(err);
-      return res.status(400).send({ error: 'Erro ao buscar suas consultas' });
+      console.error(err)
+      return res.status(400).send({ error: 'Erro ao buscar suas consultas' })
     }
   }
 
   async delete(req, res) {
-    const { id } = req.params;
+    const { id } = req.params
 
     try {
       const appointment = await CancelAppointmentService.run({
         appointment_id: id,
         user_id: req.userId,
-      });
+      })
 
-      return res.status(200).send(appointment);
+      return res.status(200).send(appointment)
     } catch (err) {
-      console.error(err);
+      console.error(err)
       return res
         .status(400)
-        .send({ error: err.message || 'Erro ao cancelar consulta' });
+        .send({ error: err.message || 'Erro ao cancelar consulta' })
     }
   }
 }
 
-export default new AppointmentController();
+export default new AppointmentController()
